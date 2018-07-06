@@ -17,6 +17,7 @@ import sched
 import sys
 import inspect
 from logging import getLogger
+from collections import Counter
 
 import uavcan
 import uavcan.driver as driver
@@ -146,7 +147,6 @@ class HandleRemover:
 class HandlerDispatcher(object):
     def __init__(self, node):
         self._handlers = []  # type, callable
-        from collections import Counter
         self._registered_data_type_ids = Counter()
 
         self._node = node
