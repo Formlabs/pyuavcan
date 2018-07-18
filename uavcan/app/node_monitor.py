@@ -166,7 +166,6 @@ class NodeMonitor(object):
             new_entry = False
         except KeyError:
             entry = self.Entry()
-            entry._info_requested_at = 0
             self._registry[node_id] = entry
             new_entry = True
 
