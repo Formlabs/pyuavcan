@@ -199,51 +199,6 @@ class SocketCAN(AbstractDriver):
             time.sleep(2)
             continue
 
-            try:
-                frame = None
-                while True:
-                    try:
-                        from datetime import datetime
-                        time_ = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
-                        print("Getting frame: {}".format(time_))
-                        frame = self._write_queue.get(block=False)
-                        time_ = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S.%f')
-                        print("Sending frame: {} {}".format(time_, frame))
-                        if frame is None:
-                            break
-                        try:
-                            while not self._writer_thread_should_stop:
-                                try:
-                                    message_id = frame.id | (CAN_EFF_FLAG if frame.extended else 0)
-                                    message_pad = bytes(frame.data) + b'\x00' * (8 - len(frame.data))
-                                    raw_message = struct.pack(self.FRAME_FORMAT, message_id, len(frame.data), message_pad)
-
-                                    self.socket.send(raw_message)
-
-                                    frame.ts_monotonic = time.monotonic()
-                                    frame.ts_real = time.time()
-                                    self._write_feedback_queue.put(frame)
-                                except OSError as ex:
-                                    if ex.errno == errno.ENOBUFS:
-                                        time.sleep(0.0002)
-                                    else:
-                                        raise
-                                else:
-                                    break
-                        except Exception as ex:
-                            self._write_feedback_queue.put(ex)
-                    except:
-                        pass
-
-                import time
-                print("start sleep")
-                time.sleep(2.)
-                print("End sleep")
-                if frame is None:
-                    continue
-            except queue.Empty:
-                continue
-
     def _check_write_feedback(self):
         try:
             item = self._write_feedback_queue.get_nowait()
